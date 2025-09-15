@@ -2,6 +2,18 @@
 
 A modern, full-featured T-shirt e-commerce platform built with Next.js, Supabase, and TypeScript. Create, customize, and sell your own T-shirt designs in a beautiful, user-friendly marketplace.
 
+## 🚀 Live Demo
+
+**🌐 [Visit T4U Live Application](https://t-shirt-site-nine.vercel.app/)**
+
+Try out the platform:
+- Browse existing T-shirt designs
+- Create your own custom T-shirts
+- Experience the full e-commerce workflow
+- Test the design studio and shopping cart
+
+*Scan the QR code or visit the link above to access the live application*
+
 ![T4U Platform](https://img.shields.io/badge/Platform-T4U-blue) ![Next.js](https://img.shields.io/badge/Next.js-15.5.3-black) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue) ![Supabase](https://img.shields.io/badge/Supabase-Backend-green) ![Tailwind](https://img.shields.io/badge/Tailwind-CSS-blue)
 
 ## ✨ Features
