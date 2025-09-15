@@ -36,14 +36,14 @@ export default function CreateTShirtPage() {
     currentView: 'front' as 'front' | 'back'
   });
 
-  const handleFormChange = (field: string, value: any) => {
+  const handleFormChange = (field: string, value: unknown) => {
     setTshirtData(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
-  const handleDesignChange = (updates: any) => {
+  const handleDesignChange = (updates: Record<string, unknown>) => {
     setTshirtData(prev => ({
       ...prev,
       ...updates
@@ -68,7 +68,7 @@ export default function CreateTShirtPage() {
 
       // Generate and upload T-shirt snapshots
       console.log('Generating T-shirt snapshots...');
-      let snapshotUrls: { front: string | null; back: string | null } = { front: null, back: null };
+      const snapshotUrls: { front: string | null; back: string | null } = { front: null, back: null };
       try {
         const snapshots = await captureTShirtSnapshots(tshirtData);
         console.log('Snapshots generated successfully');
@@ -112,7 +112,7 @@ export default function CreateTShirtPage() {
       
 
       // Prepare data for database insertion
-      const insertData: any = {
+      const insertData: Record<string, unknown> = {
         user_id: user.id,
         label: tshirtData.label,
         title: tshirtData.label, // Keep for backward compatibility

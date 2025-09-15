@@ -15,7 +15,7 @@ interface TShirt {
   color: string;
   preview_front_url?: string;
   preview_back_url?: string;
-  designs: any;
+  designs: Record<string, unknown>;
   created_at: string;
 }
 
@@ -152,7 +152,7 @@ export function YourShirtsSection() {
             </div>
             
             <h3 className="text-lg font-semibold text-slate-700 mb-2">
-              You don't have any shirts yet
+              You don&apos;t have any shirts yet
             </h3>
             
             <p className="text-slate-500 mb-6 max-w-md mx-auto">

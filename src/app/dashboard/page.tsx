@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -9,7 +9,22 @@ import { CartIcon } from '@/components/cart/CartIcon';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface TShirtCardProps {
-  tshirt: any;
+  tshirt: {
+    id: string;
+    label?: string;
+    title?: string;
+    description?: string;
+    price: number;
+    color?: string;
+    preview_front_url?: string;
+    preview_back_url?: string;
+    designs?: { front: unknown[]; back: unknown[] };
+    profiles?: {
+      first_name?: string;
+      last_name?: string;
+      email?: string;
+    };
+  };
 }
 
 function TShirtCard({ tshirt }: TShirtCardProps) {
@@ -18,9 +33,6 @@ function TShirtCard({ tshirt }: TShirtCardProps) {
   const { addToCart, isInCart } = useCart();
   const { profile } = useUserProfile();
 
-  const frontDesigns = tshirt.designs?.front || [];
-  const backDesigns = tshirt.designs?.back || [];
-  const hasBackDesigns = backDesigns.length > 0 || tshirt.preview_back_url;
   const hasPreviewImages = tshirt.preview_front_url || tshirt.preview_back_url;
 
   const toggleView = () => {
@@ -249,17 +261,17 @@ function TShirtCard({ tshirt }: TShirtCardProps) {
 export default function DashboardPage() {
   const router = useRouter();
   const supabase = createClient();
-  const [tshirts, setTshirts] = useState<any[]>([]);
-  const [filteredTshirts, setFilteredTshirts] = useState<any[]>([]);
+  const [tshirts, setTshirts] = useState<TShirtCardProps['tshirt'][]>([]);
+  const [filteredTshirts, setFilteredTshirts] = useState<TShirtCardProps['tshirt'][]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'price_low' | 'price_high'>('newest');
 
   useEffect(() => {
     fetchTshirts();
-  }, []);
+  }, [fetchTshirts]);
 
-  const fetchTshirts = async () => {
+  const fetchTshirts = useCallback(async () => {
     try {
       // First, fetch all T-shirts without profile joins to avoid RLS issues
       const { data: shirtsData, error: shirtsError } = await supabase
@@ -287,7 +299,7 @@ export default function DashboardPage() {
               ...shirt,
               profiles: profileData
             };
-          } catch (profileError) {
+          } catch {
             // If we can't fetch the profile (due to RLS), just return the shirt without profile
             return {
               ...shirt,
@@ -303,7 +315,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
 
   // Filter and sort T-shirts
   useEffect(() => {

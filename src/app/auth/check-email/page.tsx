@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AuthLayout } from '@/components/layout/AuthLayout';
@@ -34,7 +34,7 @@ function CheckEmailContent() {
       } else {
         setResendMessage('Confirmation email sent! Please check your inbox.');
       }
-    } catch (error) {
+    } catch {
       setResendMessage('An error occurred. Please try again.');
     } finally {
       setIsResending(false);
@@ -57,7 +57,7 @@ function CheckEmailContent() {
             Confirmation Email Sent
           </h3>
           <p className="text-slate-600 text-sm leading-relaxed">
-            We've sent a confirmation email to{' '}
+            We&apos;ve sent a confirmation email to{' '}
             <span className="font-semibold text-slate-800">
               {email || 'your email address'}
             </span>
@@ -67,7 +67,7 @@ function CheckEmailContent() {
 
         <div className="space-y-4">
           <div className="text-sm text-slate-600">
-            <p className="mb-2">Didn't receive the email?</p>
+            <p className="mb-2">Didn&apos;t receive the email?</p>
             <ul className="text-left space-y-1 text-xs">
               <li>• Check your spam/junk folder</li>
               <li>• Make sure you entered the correct email address</li>

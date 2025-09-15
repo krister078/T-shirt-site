@@ -59,7 +59,7 @@ export default function CartPage() {
                     </svg>
                   </div>
                   <h2 className="text-xl font-semibold text-slate-800 mb-2">Your cart is empty</h2>
-                  <p className="text-slate-600 mb-6">Looks like you haven't added any T-shirts to your cart yet.</p>
+                  <p className="text-slate-600 mb-6">Looks like you haven&apos;t added any T-shirts to your cart yet.</p>
                   <button
                     onClick={handleContinueShopping}
                     className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"

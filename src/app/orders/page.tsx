@@ -268,7 +268,7 @@ export default function OrdersPage() {
               </div>
               <h3 className="text-lg font-medium text-slate-900 mb-2">No orders yet</h3>
               <p className="text-slate-600 mb-6">
-                You haven't placed any orders yet. Start shopping to see your orders here!
+                You haven&apos;t placed any orders yet. Start shopping to see your orders here!
               </p>
               <button
                 onClick={() => router.push('/dashboard')}

@@ -26,7 +26,7 @@ export interface CartItem {
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (tshirt: any, size?: string) => void;
+  addToCart: (tshirt: Record<string, unknown>, size?: string) => void;
   removeFromCart: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   updateSize: (itemId: string, size: string) => void;
@@ -48,7 +48,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       try {
         const parsedCart = JSON.parse(savedCart);
         // Convert addedAt back to Date objects
-        const cartWithDates = parsedCart.map((item: any) => ({
+        const cartWithDates = parsedCart.map((item: Record<string, unknown>) => ({
           ...item,
           addedAt: new Date(item.addedAt)
         }));
@@ -64,7 +64,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('t4u-cart', JSON.stringify(items));
   }, [items]);
 
-  const addToCart = (tshirt: any, size: string = 'M') => {
+  const addToCart = (tshirt: Record<string, unknown>, size: string = 'M') => {
     setItems(prevItems => {
       // Check if item already exists with same size
       const existingItem = prevItems.find(item => 
