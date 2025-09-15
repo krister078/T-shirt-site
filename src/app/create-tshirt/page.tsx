@@ -109,6 +109,7 @@ export default function CreateTShirtPage() {
       console.log('Uploading design files to Supabase Storage...');
       const processedDesigns = await uploadDesignFiles(tshirtData.designs);
       console.log('Design files uploaded successfully:', processedDesigns);
+      
 
       // Prepare data for database insertion
       const insertData: any = {

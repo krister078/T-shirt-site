@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { createClient } from '@/lib/supabase/client';
 
 interface AddressData {
   street: string;
@@ -10,33 +12,146 @@ interface AddressData {
   state: string;
   zipCode: string;
   country: string;
+  phone: string;
 }
 
 export function AddressSection() {
+  const router = useRouter();
+  const supabase = createClient();
+  
   const [addressData, setAddressData] = useState<AddressData>({
     street: '',
     city: '',
     state: '',
     zipCode: '',
     country: '',
+    phone: '',
   });
 
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Load existing address on component mount
+  useEffect(() => {
+    const loadAddress = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (error) {
+          console.error('Error fetching user:', error);
+          router.push('/auth/login');
+          return;
+        }
+
+        if (!user) {
+          router.push('/auth/login');
+          return;
+        }
+
+        // Fetch existing address
+        const { data: addressRecord, error: addressError } = await supabase
+          .from('addresses')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        if (addressRecord && !addressError) {
+          setAddressData({
+            street: addressRecord.street || '',
+            city: addressRecord.city || '',
+            state: addressRecord.state || '',
+            zipCode: addressRecord.zip_code || '',
+            country: addressRecord.country || '',
+            phone: addressRecord.phone || '',
+          });
+        }
+      } catch (error) {
+        console.error('Unexpected error loading address:', error);
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    loadAddress();
+  }, [supabase, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Address data:', addressData);
-      setIsLoading(false);
+    try {
+      // Validate form data
+      if (!addressData.street || !addressData.city || !addressData.state || !addressData.zipCode || !addressData.country) {
+        alert('Please fill in all required address fields');
+        setIsLoading(false);
+        return;
+      }
+
+      // Phone number validation (Bulgarian format: 10 digits)
+      if (addressData.phone) {
+        const phoneDigits = addressData.phone.replace(/\D/g, '');
+        if (phoneDigits.length !== 10) {
+          alert('Please enter a valid 10-digit phone number (e.g., 0812345678)');
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        alert('Please log in to save your address');
+        return;
+      }
+
+      const addressPayload = {
+        user_id: user.id,
+        street: addressData.street,
+        city: addressData.city,
+        state: addressData.state,
+        zip_code: addressData.zipCode,
+        country: addressData.country,
+        phone: addressData.phone,
+      };
+
+      // Check if address already exists
+      const { data: existingAddress } = await supabase
+        .from('addresses')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (existingAddress) {
+        // Update existing address
+        const { error } = await supabase
+          .from('addresses')
+          .update(addressPayload)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      } else {
+        // Insert new address
+        const { error } = await supabase
+          .from('addresses')
+          .insert(addressPayload);
+
+        if (error) throw error;
+      }
+
       setIsEditing(false);
       setSuccessMessage('Address updated successfully!');
-      // Here you would typically make an API call to save the address
-    }, 1000);
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(''), 3000);
+      
+    } catch (error) {
+      console.error('Error saving address:', error);
+      alert('Failed to save address. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -57,17 +172,66 @@ export function AddressSection() {
     setSuccessMessage('');
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     setIsEditing(false);
-    // Reset to original data (in real app, you'd fetch from server)
-    setAddressData({
-      street: '',
-      city: '',
-      state: '',
-      zipCode: '',
-      country: '',
-    });
+    setSuccessMessage('');
+    
+    // Reset to original data from database
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: addressRecord } = await supabase
+          .from('addresses')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        if (addressRecord) {
+          setAddressData({
+            street: addressRecord.street || '',
+            city: addressRecord.city || '',
+            state: addressRecord.state || '',
+            zipCode: addressRecord.zip_code || '',
+            country: addressRecord.country || '',
+            phone: addressRecord.phone || '',
+          });
+        } else {
+          // No saved address, reset to empty
+          setAddressData({
+            street: '',
+            city: '',
+            state: '',
+            zipCode: '',
+            country: '',
+            phone: '',
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error resetting address data:', error);
+    }
   };
+
+  // Show loading state while fetching address data
+  if (isLoadingData) {
+    return (
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-slate-800">Address Information</h2>
+        </div>
+        <div className="space-y-3">
+          <div>
+            <div className="h-4 bg-slate-200 rounded animate-pulse mb-2"></div>
+            <div className="h-6 bg-slate-100 rounded animate-pulse"></div>
+          </div>
+          <div>
+            <div className="h-4 bg-slate-200 rounded animate-pulse mb-2"></div>
+            <div className="h-6 bg-slate-100 rounded animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl p-6">
@@ -156,6 +320,15 @@ export function AddressSection() {
             </div>
           </div>
 
+          <Input
+            label="Phone Number (10 digits)"
+            name="phone"
+            type="tel"
+            value={addressData.phone}
+            onChange={handleChange}
+            placeholder="0812345678"
+          />
+
           <div className="flex gap-3">
             <Button
               type="submit"
@@ -183,6 +356,7 @@ export function AddressSection() {
               <p>{addressData.street}</p>
               <p>{addressData.city}, {addressData.state} {addressData.zipCode}</p>
               <p>{addressData.country}</p>
+              {addressData.phone && <p>Phone: {addressData.phone}</p>}
             </div>
           )}
         </div>

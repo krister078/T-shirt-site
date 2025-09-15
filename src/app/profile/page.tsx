@@ -4,6 +4,7 @@ import { PasswordChangeForm } from '@/components/profile/PasswordChangeForm';
 import { AddressSection } from '@/components/profile/AddressSection';
 import { PaymentMethodSection } from '@/components/profile/PaymentMethodSection';
 import { YourShirtsSection } from '@/components/profile/YourShirtsSection';
+import { MyOrdersSection } from '@/components/profile/MyOrdersSection';
 import { DangerZone } from '@/components/profile/DangerZone';
 
 export default function ProfilePage() {
@@ -13,6 +14,7 @@ export default function ProfilePage() {
       <PasswordChangeForm />
       <AddressSection />
       <PaymentMethodSection />
+      <MyOrdersSection />
       <YourShirtsSection />
       <DangerZone />
     </ProfileLayout>

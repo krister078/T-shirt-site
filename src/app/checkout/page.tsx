@@ -12,6 +12,7 @@ interface Address {
   state: string;
   zip_code: string;
   country: string;
+  phone: string;
 }
 
 interface PaymentMethod {
@@ -35,7 +36,8 @@ export default function CheckoutPage() {
     city: '',
     state: '',
     zip_code: '',
-    country: 'Bulgaria'
+    country: 'Bulgaria',
+    phone: ''
   });
   const [saveAddress, setSaveAddress] = useState(false);
   const [hasExistingAddress, setHasExistingAddress] = useState(false);
@@ -74,7 +76,8 @@ export default function CheckoutPage() {
               city: addressData.city || '',
               state: addressData.state || '',
               zip_code: addressData.zip_code || '',
-              country: addressData.country || 'Bulgaria'
+              country: addressData.country || 'Bulgaria',
+              phone: addressData.phone || ''
             });
             setHasExistingAddress(true);
             setSaveAddress(true); // Default to saving if they already have an address
@@ -148,8 +151,15 @@ export default function CheckoutPage() {
 
   const validateForm = () => {
     // Address validation
-    if (!address.street || !address.city || !address.state || !address.zip_code) {
-      alert('Please fill in all address fields');
+    if (!address.street || !address.city || !address.state || !address.zip_code || !address.phone) {
+      alert('Please fill in all address fields including phone number');
+      return false;
+    }
+
+    // Phone number validation (Bulgarian format: 10 digits)
+    const phoneDigits = address.phone.replace(/\D/g, '');
+    if (phoneDigits.length !== 10) {
+      alert('Please enter a valid 10-digit phone number (e.g., 0812345678)');
       return false;
     }
 
@@ -160,8 +170,11 @@ export default function CheckoutPage() {
     }
 
     // Basic card number validation (should be 16 digits)
+    // Skip validation if using existing payment method (starts with stars)
     const cardDigits = payment.cardNumber.replace(/\D/g, '');
-    if (cardDigits.length !== 16) {
+    const isExistingCard = payment.cardNumber.startsWith('****');
+    
+    if (!isExistingCard && cardDigits.length !== 16) {
       alert('Please enter a valid 16-digit card number');
       return false;
     }
@@ -202,7 +215,8 @@ export default function CheckoutPage() {
           city: address.city,
           state: address.state,
           zip_code: address.zip_code,
-          country: address.country
+          country: address.country,
+          phone: address.phone
         };
 
         if (hasExistingAddress) {
@@ -223,14 +237,110 @@ export default function CheckoutPage() {
       // TODO: Process payment with payment processor
       // For now, we'll simulate a successful payment
       
+      // Prepare cart items for order creation
+      console.log('Cart items before mapping:', items);
+      
+      const cartItems = items.map(item => {
+        const mappedItem = {
+          shirt_id: item.tshirt.id,
+          title: item.tshirt.title || item.tshirt.label,
+          description: item.tshirt.description || '',
+          price: item.tshirt.price,
+          color: item.tshirt.color || '',
+          designs: null, // Will be fetched from the shirts table by the database function
+          preview_front_url: item.tshirt.preview_front_url || '',
+          preview_back_url: item.tshirt.preview_back_url || '',
+          size: item.size,
+          quantity: item.quantity
+        };
+        console.log('Mapped cart item:', mappedItem);
+        return mappedItem;
+      });
+      
+      console.log('Final cart items:', cartItems);
+      
+      // Validate cart items
+      if (!cartItems || cartItems.length === 0) {
+        throw new Error('No items in cart to process');
+      }
+      
+      // Check for required fields
+      const invalidItems = cartItems.filter(item => 
+        !item.shirt_id || !item.title || !item.price || !item.size || !item.quantity
+      );
+      
+      if (invalidItems.length > 0) {
+        console.error('Invalid cart items found:', invalidItems);
+        throw new Error('Some cart items are missing required information');
+      }
+
+      // Try with phone first, fallback without phone if function doesn't support it yet
+      let orderData = {
+        p_user_id: user.id,
+        p_cart_items: cartItems,
+        p_shipping_address: {
+          street: address.street,
+          city: address.city,
+          state: address.state,
+          zip_code: address.zip_code,
+          country: address.country,
+          phone: address.phone
+        },
+        p_payment_method_last4: payment.cardNumber.slice(-4)
+      };
+      
+      console.log('Creating order with data:', orderData);
+
+      // Create order using the database function
+      let { data: orderId, error: orderError } = await supabase
+        .rpc('create_order', orderData);
+
+      console.log('First attempt result:', { orderId, orderError });
+
+      // If error might be due to phone field not existing, try without phone
+      if (orderError) {
+        console.log('Error occurred, trying without phone field...');
+        console.log('Error details:', JSON.stringify(orderError, null, 2));
+        
+        orderData = {
+          p_user_id: user.id,
+          p_cart_items: cartItems,
+          p_shipping_address: {
+            street: address.street,
+            city: address.city,
+            state: address.state,
+            zip_code: address.zip_code,
+            country: address.country
+          },
+          p_payment_method_last4: payment.cardNumber.slice(-4)
+        };
+        
+        console.log('Retrying with data:', orderData);
+        
+        const result = await supabase.rpc('create_order', orderData);
+        orderId = result.data;
+        orderError = result.error;
+        
+        console.log('Second attempt result:', { orderId, orderError });
+      }
+
+      if (orderError) {
+        console.error('Final order creation error:', JSON.stringify(orderError, null, 2));
+        console.error('Error type:', typeof orderError);
+        console.error('Error keys:', Object.keys(orderError));
+        throw orderError;
+      }
+
+      console.log('Order created successfully with ID:', orderId);
+
       // Clear cart after successful order
       clearCart();
       
-      // Show success message
+      // Show success message and redirect to orders page
       alert('Order placed successfully! Thank you for your purchase.');
       
-      // Redirect to dashboard
-      router.push('/dashboard');
+      // Redirect to orders page to show the new order
+      router.push('/orders');
       
     } catch (error) {
       console.error('Error placing order:', error);
@@ -355,6 +465,19 @@ export default function CheckoutPage() {
                           <option value="Slovenia">Slovenia</option>
                           <option value="Kosovo">Kosovo</option>
                         </select>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                          Phone Number (10 digits)
+                        </label>
+                        <input
+                          type="tel"
+                          value={address.phone}
+                          onChange={(e) => handleAddressChange('phone', e.target.value)}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800"
+                          placeholder="0812345678"
+                        />
                       </div>
                     </div>
                     

@@ -34,7 +34,7 @@ function TShirtCard({ tshirt }: TShirtCardProps) {
 
   return (
     <div 
-      className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-gray-200 transition-all duration-300 cursor-pointer group flex flex-col h-96"
+      className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-gray-200 transition-all duration-300 cursor-pointer group flex flex-col min-h-96"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -43,11 +43,16 @@ function TShirtCard({ tshirt }: TShirtCardProps) {
         <h3 className="font-bold text-gray-900 text-lg leading-tight group-hover:text-blue-600 transition-colors duration-200 text-center truncate">
           {tshirt.label || tshirt.title || 'Untitled T-Shirt'}
         </h3>
-        <p className="text-xs text-gray-500 text-center mt-1">
-          by {(tshirt.profiles?.first_name && tshirt.profiles?.last_name) 
-            ? `${tshirt.profiles.first_name} ${tshirt.profiles.last_name}`.trim()
-            : tshirt.profiles?.email?.split('@')[0] || 'Anonymous'}
-        </p>
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-xs text-gray-500">
+            by {(tshirt.profiles?.first_name && tshirt.profiles?.last_name) 
+              ? `${tshirt.profiles.first_name} ${tshirt.profiles.last_name}`.trim()
+              : tshirt.profiles?.email?.split('@')[0] || 'Anonymous'}
+          </p>
+          <span className="text-lg font-bold text-emerald-600">
+            ${Number(tshirt.price || 0).toFixed(2)}
+          </span>
+        </div>
       </div>
 
       {/* Preview Section - Takes up most of the space */}
@@ -228,21 +233,13 @@ function TShirtCard({ tshirt }: TShirtCardProps) {
           </p>
         </div>
         
-        {/* Price and Color */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div 
-              className="w-4 h-4 rounded-full border border-gray-200 shadow-sm" 
-              style={{ backgroundColor: tshirt.color || '#f8fafc' }}
-            />
-            <span className="text-xs text-gray-500">Color</span>
-          </div>
-          
-          <div className="text-right">
-            <span className="text-xl font-bold text-emerald-600">
-              ${(tshirt.price || 0).toFixed(2)}
-            </span>
-          </div>
+        {/* Color Info */}
+        <div className="flex items-center gap-2">
+          <div 
+            className="w-4 h-4 rounded-full border border-gray-200 shadow-sm" 
+            style={{ backgroundColor: tshirt.color || '#f8fafc' }}
+          />
+          <span className="text-xs text-gray-500">Color</span>
         </div>
       </div>
     </div>
