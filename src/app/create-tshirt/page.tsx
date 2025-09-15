@@ -36,14 +36,14 @@ export default function CreateTShirtPage() {
     currentView: 'front' as 'front' | 'back'
   });
 
-  const handleFormChange = (field: string, value: unknown) => {
+  const handleFormChange = (field: string, value: string | number | typeof tshirtData.designs | 'front' | 'back') => {
     setTshirtData(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
-  const handleDesignChange = (updates: Record<string, unknown>) => {
+  const handleDesignChange = (updates: { designs?: typeof tshirtData.designs; currentView?: 'front' | 'back' }) => {
     setTshirtData(prev => ({
       ...prev,
       ...updates
@@ -112,7 +112,18 @@ export default function CreateTShirtPage() {
       
 
       // Prepare data for database insertion
-      const insertData: Record<string, unknown> = {
+      const insertData: {
+        user_id: string;
+        label: string;
+        title: string;
+        description: string;
+        price: number;
+        color: string;
+        designs: typeof processedDesigns;
+        status: string;
+        preview_front_url?: string;
+        preview_back_url?: string;
+      } = {
         user_id: user.id,
         label: tshirtData.label,
         title: tshirtData.label, // Keep for backward compatibility

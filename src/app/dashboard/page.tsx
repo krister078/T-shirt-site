@@ -18,12 +18,13 @@ interface TShirtCardProps {
     color?: string;
     preview_front_url?: string;
     preview_back_url?: string;
-    designs?: { front: unknown[]; back: unknown[] };
+    designs?: { front: Array<{ id: string; fileUrl?: string }>; back: Array<{ id: string; fileUrl?: string }> };
     profiles?: {
       first_name?: string;
       last_name?: string;
       email?: string;
     };
+    created_at?: string;
   };
 }
 
@@ -33,7 +34,6 @@ function TShirtCard({ tshirt }: TShirtCardProps) {
   const { addToCart, isInCart } = useCart();
   const { profile } = useUserProfile();
 
-  const hasPreviewImages = tshirt.preview_front_url || tshirt.preview_back_url;
 
   const toggleView = () => {
     setCurrentView(currentView === 'front' ? 'back' : 'front');
@@ -267,10 +267,6 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'price_low' | 'price_high'>('newest');
 
-  useEffect(() => {
-    fetchTshirts();
-  }, [fetchTshirts]);
-
   const fetchTshirts = useCallback(async () => {
     try {
       // First, fetch all T-shirts without profile joins to avoid RLS issues
@@ -303,7 +299,7 @@ export default function DashboardPage() {
             // If we can't fetch the profile (due to RLS), just return the shirt without profile
             return {
               ...shirt,
-              profiles: null
+              profiles: undefined
             };
           }
         })
@@ -316,6 +312,10 @@ export default function DashboardPage() {
       setLoading(false);
     }
   }, [supabase]);
+
+  useEffect(() => {
+    fetchTshirts();
+  }, [fetchTshirts]);
 
   // Filter and sort T-shirts
   useEffect(() => {
@@ -335,10 +335,10 @@ export default function DashboardPage() {
     // Apply sorting
     switch (sortBy) {
       case 'newest':
-        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        filtered.sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime());
         break;
       case 'oldest':
-        filtered.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        filtered.sort((a, b) => new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime());
         break;
       case 'price_low':
         filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
@@ -397,7 +397,7 @@ export default function DashboardPage() {
             <div className="sm:w-48 relative">
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'price_low' | 'price_high')}
                 className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white appearance-none cursor-pointer"
               >
                 <option value="newest">Newest First</option>
@@ -416,7 +416,7 @@ export default function DashboardPage() {
             Showing {filteredTshirts.length} of {tshirts.length} T-shirts
             {searchTerm && (
               <span className="ml-2">
-                for "<span className="font-medium">{searchTerm}</span>"
+                for &quot;<span className="font-medium">{searchTerm}</span>&quot;
               </span>
             )}
           </div>
@@ -448,7 +448,7 @@ export default function DashboardPage() {
               </h3>
               <p className="text-slate-600 mb-6 max-w-md mx-auto">
                 {searchTerm 
-                  ? `No T-shirts match your search for "${searchTerm}". Try different keywords or browse all designs.`
+                  ? `No T-shirts match your search for &quot;${searchTerm}&quot;. Try different keywords or browse all designs.`
                   : 'Be the first to add a T-shirt design to T4U!'
                 }
               </p>

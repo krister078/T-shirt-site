@@ -21,7 +21,7 @@ interface TShirtDesignerProps {
     }>;
   };
   currentView: 'front' | 'back';
-  onChange: (updates: any) => void;
+  onChange: (updates: { designs?: TShirtDesignerProps['designs']; currentView?: 'front' | 'back' }) => void;
 }
 
 export function TShirtDesigner({ 
@@ -68,7 +68,7 @@ export function TShirtDesigner({
         }
       });
     };
-  }, [designs, currentView]);
+  }, [designs, currentView, designUrls]);
 
   const handleMouseDown = (e: React.MouseEvent, action: 'drag' | 'resize' | 'rotate', designId: string) => {
     e.preventDefault();

@@ -34,7 +34,8 @@ function CheckEmailContent() {
       } else {
         setResendMessage('Confirmation email sent! Please check your inbox.');
       }
-    } catch {
+    } catch (error) {
+      console.error('Error resending email:', error);
       setResendMessage('An error occurred. Please try again.');
     } finally {
       setIsResending(false);

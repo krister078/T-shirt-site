@@ -37,7 +37,10 @@ export interface Shirt {
   price: number
   image_url?: string
   color?: string
-  designs?: Record<string, unknown>
+  designs?: {
+    front?: Array<{ id: string; fileUrl?: string }>;
+    back?: Array<{ id: string; fileUrl?: string }>;
+  }
   status?: string
   preview_front_url?: string
   preview_back_url?: string
@@ -75,7 +78,10 @@ export interface OrderItem {
   shirt_description?: string
   shirt_price: number
   shirt_color?: string
-  shirt_designs?: Record<string, unknown>
+  shirt_designs?: {
+    front?: Array<{ id: string; fileUrl?: string }>;
+    back?: Array<{ id: string; fileUrl?: string }>;
+  }
   shirt_preview_front_url?: string
   shirt_preview_back_url?: string
   size: string

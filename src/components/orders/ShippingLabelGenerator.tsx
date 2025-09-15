@@ -31,7 +31,7 @@ export function ShippingLabelGenerator({ order }: ShippingLabelGeneratorProps) {
         if (profile && (profile.first_name || profile.last_name)) {
           fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
         }
-      } catch (error) {
+      } catch {
         console.log('Could not fetch user profile for PDF, using fallback name');
       }
       
@@ -123,7 +123,6 @@ export function ShippingLabelGenerator({ order }: ShippingLabelGeneratorProps) {
       
       // Calculate dimensions to fit nicely on A4
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
       
       // Scale to fit width with some margin
       const imgWidth = pdfWidth - 20; // 10mm margin on each side

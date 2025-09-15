@@ -3,7 +3,7 @@ import jsPDF from 'jspdf';
 
 // Base64 encoded font data for a font that supports Cyrillic
 // This is a simplified approach - in production you'd want to use a proper font file
-const cyrillicFontBase64 = `data:font/truetype;charset=utf-8;base64,AAEAAAAMAIAAAwBAT1MvMkUYL1YAAADsAAAAYGNtYXAAAAAAAAFMAAAAHGdhc3D//wADAAAAaAAAAAhnbHlmAAAAAAAAcAAAACBsb2NhAAAAAAAAkAAAABBtYXhwAAAAAAAAoAAAACBuYW1lAAAAAAAAwAAAACBwb3N0AAAAAAAA4AAAACAAAQAAAAABAA==`;
+// const cyrillicFontBase64 = `data:font/truetype;charset=utf-8;base64,AAEAAAAMAIAAAwBAT1MvMkUYL1YAAADsAAAAYGNtYXAAAAAAAAFMAAAAHGdhc3D//wADAAAAaAAAAAhnbHlmAAAAAAAAcAAAACBsb2NhAAAAAAAAkAAAABBtYXhwAAAAAAAAoAAAACBuYW1lAAAAAAAAwAAAACBwb3N0AAAAAAAA4AAAACAAAQAAAAABAA==`;
 
 export function addCyrillicFontToPDF(pdf: jsPDF) {
   try {

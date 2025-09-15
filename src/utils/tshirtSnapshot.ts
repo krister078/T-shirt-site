@@ -185,7 +185,7 @@ async function drawTShirtShape(
  */
 function createTShirtClippingMask(
   ctx: CanvasRenderingContext2D,
-  view: 'front' | 'back'
+  _view: 'front' | 'back'
 ): void {
   ctx.beginPath();
   
@@ -263,7 +263,7 @@ async function drawDesignOnCanvas(
     id: string;
   }
 ): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const img = new Image();
     
     img.onload = () => {
@@ -377,7 +377,7 @@ export async function captureTShirtSnapshots(
  */
 export async function uploadSnapshotToStorage(
   base64Image: string,
-  fileName: string
+  _fileName: string
 ): Promise<string> {
   // TODO: Implement actual upload to Supabase Storage
   // For now, return the base64 data URL

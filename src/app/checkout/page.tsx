@@ -49,7 +49,7 @@ export default function CheckoutPage() {
     cvv: '',
     cardholderName: ''
   });
-  const [hasExistingPayment, setHasExistingPayment] = useState(false);
+  const [, setHasExistingPayment] = useState(false);
 
   const totalItems = getTotalItems();
   const subtotalPrice = getTotalPrice();
@@ -310,7 +310,8 @@ export default function CheckoutPage() {
             city: address.city,
             state: address.state,
             zip_code: address.zip_code,
-            country: address.country
+            country: address.country,
+            phone: address.phone || ''
           },
           p_payment_method_last4: payment.cardNumber.slice(-4)
         };

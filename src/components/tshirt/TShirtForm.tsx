@@ -28,7 +28,7 @@ interface TShirtFormProps {
     };
     currentView: 'front' | 'back';
   };
-  onChange: (field: string, value: any) => void;
+  onChange: (field: string, value: string | number | TShirtFormProps['data']['designs'] | 'front' | 'back') => void;
 }
 
 export function TShirtForm({ data, onChange }: TShirtFormProps) {

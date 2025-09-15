@@ -37,7 +37,7 @@ export async function uploadFileToStorage(
     console.log(`Uploading file: ${fileName}`);
 
     // Upload file to Supabase Storage
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from(bucket)
       .upload(fileName, file, {
         cacheControl: '3600',
@@ -111,7 +111,26 @@ export async function uploadDesignFiles(
     fileUrl: string;
   }>;
 }> {
-  const processedDesigns = { front: [], back: [] };
+  const processedDesigns: {
+    front: Array<{
+      id: string;
+      position: { x: number; y: number };
+      size: { width: number; height: number };
+      fileName: string;
+      fileType: string;
+      fileSize: number;
+      fileUrl: string;
+    }>;
+    back: Array<{
+      id: string;
+      position: { x: number; y: number };
+      size: { width: number; height: number };
+      fileName: string;
+      fileType: string;
+      fileSize: number;
+      fileUrl: string;
+    }>;
+  } = { front: [], back: [] };
 
   for (const view of ['front', 'back'] as const) {
     for (const design of designs[view]) {
@@ -248,7 +267,10 @@ export async function deleteTShirtWithFiles(tshirtId: string): Promise<{ success
 
     // Add design files to deletion list
     if (tshirt.designs) {
-      const designs = tshirt.designs as any;
+      const designs = tshirt.designs as {
+        front?: Array<{ id: string; fileUrl?: string }>;
+        back?: Array<{ id: string; fileUrl?: string }>;
+      };
       
       // Process front designs
       if (designs.front && Array.isArray(designs.front)) {

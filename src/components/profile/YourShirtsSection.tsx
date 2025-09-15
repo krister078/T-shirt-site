@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/Button';
@@ -15,7 +15,10 @@ interface TShirt {
   color: string;
   preview_front_url?: string;
   preview_back_url?: string;
-  designs: Record<string, unknown>;
+  designs: {
+    front?: Array<{ id: string; fileUrl?: string }>;
+    back?: Array<{ id: string; fileUrl?: string }>;
+  };
   created_at: string;
 }
 
@@ -36,12 +39,7 @@ export function YourShirtsSection() {
     isDeleting: false
   });
 
-  // Fetch user's T-shirts
-  useEffect(() => {
-    fetchTShirts();
-  }, []);
-
-  const fetchTShirts = async () => {
+  const fetchTShirts = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -63,7 +61,12 @@ export function YourShirtsSection() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
+
+  // Fetch user's T-shirts
+  useEffect(() => {
+    fetchTShirts();
+  }, [fetchTShirts]);
 
   const handleDeleteClick = (tshirt: TShirt) => {
     setDeleteDialog({
